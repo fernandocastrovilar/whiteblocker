@@ -84,17 +84,32 @@ def get_blocked_ip():
 
 
 # Get the location of the IP. This can be useful to filter incoming connections by country
-def locate_ip(ip):
+class LocateIp:
 	# We use a free and open API to get the IP location on json format
-	url = "https://geoip-db.com/json/" + ip
-	response = requests.get(url=url)
-	data = response.json()
-	return data
+	def __init__(self, ip):
+		self.ip = ip
+		url = "https://geoip-db.com/json/" + self.ip
+		response = requests.get(url=url)
+		self.data = response.json()
+
+	def country_code(self):
+		country_code = self.data['country_code']
+		return country_code
+
+	def country_name(self):
+		country_name = self.data['country_name']
+		return country_name
+
+	def state(self):
+		state = self.data['state']
+		return state
+
+	def postal(self):
+		postal = self.data['postal']
+		return postal
 
 
 # Function to get report from IP
 def reverse_nmap(ip):
 	# If wanted, we can perform a nmap to incoming IP connection to retrieve some (useful) info about it
 	return "report nmap"
-
-
