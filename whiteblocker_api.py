@@ -3,7 +3,7 @@ import datetime
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp
 from common.DatabaseUtils import insert_db, select_all, select_full_custom, update_row
-from common.NotifyUtils import *
+# from common.NotifyUtils import *
 
 
 # Case 1: IP not blocked and not in DB
@@ -16,7 +16,7 @@ def case_1(ip):
 	# Next steps consist on retrieve info about the IP, store it on the DB and send a notification with the data.
 	# Get IP info
 	ip_data = LocateIp(ip)
-	location = ip_data.country_name() + ", " + ip_data.state()
+	location = str(ip_data.country_name()) + ", " + str(ip_data.state())
 	print("The blocked IP is from {0}".format(location))
 	logging.info("The blocked IP is from {0}".format(location))
 
