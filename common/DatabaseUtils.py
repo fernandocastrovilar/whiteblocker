@@ -95,9 +95,3 @@ def drop_table():
 	conn = sqlite3.connect("whiteblocker.db")
 	conn.execute('''DROP TABLE RECORD''')
 
-
-test = select_all()
-if any("10.10.10.10" in s for s in test):
-	print("Esta en la lista")
-else:
-	print("No esta en la lista")
