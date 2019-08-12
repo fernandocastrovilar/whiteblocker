@@ -9,6 +9,7 @@ sockets = "*"
 random2 = "*"
 jsonlib-python3 = "*"
 requests = "*"
+ipaddress = "*"
 
 [dev-packages]
 
