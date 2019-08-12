@@ -1,9 +1,10 @@
 import logging
 import datetime
+import ipaddress
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp
-from common.DatabaseUtils import insert_db, select_all, select_full_custom, update_row
-# from common.NotifyUtils import *
+from common.DatabaseUtils import insert_db, select_all, select_full_custom, update_row, init_db
+from common.NotifyUtils import *
 
 
 # Case 1: IP not blocked and not in DB
@@ -87,11 +88,16 @@ def case_2(ip):
 
 # Main function
 def main():
+	init_db()
 	while True:
 		print("opening socket")
 		socket = open_listen_socket()
 		if socket != "timeout":
 			ip = socket
+			if ipaddress.ip_address(ip).is_private is True:
+				print("Skipping, connection from private network")
+				logging.info("Skipping, connection from private network")
+				continue
 			print("Launching function to block the IP {0}".format(ip))
 			logging.info("Launching function to block the IP {0}".format(ip))
 			lst = select_all()
