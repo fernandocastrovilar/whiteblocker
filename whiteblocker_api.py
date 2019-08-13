@@ -4,7 +4,10 @@ import ipaddress
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp
 from common.DatabaseUtils import insert_db, select_all, select_full_custom, update_row, init_db
-from common.NotifyUtils import *
+from common.NotifyUtils import send_email
+
+
+recipient = ""
 
 
 # Case 1: IP not blocked and not in DB
@@ -36,6 +39,10 @@ def case_1(ip):
 		logging.info(row_inserted)
 		print("Successful inserted data on DB")
 		logging.info("Successful inserted data on DB")
+		print("Sending notification...")
+		logging.info("Sending notification...")
+		send_email(recipient=recipient,
+					msg="Blocking IP due to a scan try.\n\nIP: {0}\nTries: 1\nDate: {1}".format(ip, date))
 		return "ok"
 	except Exception as e:
 		print(e)
@@ -83,6 +90,10 @@ def case_2(ip):
 	elif update_status == "ok":
 		print("Successful updated status")
 		logging.info("Successful updated status")
+	print("Sending notification...")
+	logging.info("Sending notification...")
+	send_email(recipient=recipient,
+				msg="Blocking IP due to a scan try.\n\nIP: {0}\nTries:{1}\nDate: {2}".format(ip, tries, date))
 	return "ok"
 
 
