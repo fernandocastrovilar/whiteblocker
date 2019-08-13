@@ -27,9 +27,9 @@ def case_1(ip):
 	# Write IP, date and info to DB
 	print("Writing info on DB...")
 	logging.info("Writing info on DB...")
-	date = "{0}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+	date = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
 	try:
-		result = insert_db(ip=ip, tries="1", location=location, current_status="Blocked", first_view=date, last_view=date)
+		result = insert_db(ip=ip, tries="1", location=location, current_status="Blocked", blocked_date=date, unblocked_date="None", first_view=date, last_view=date)
 		if result == "ko":
 			print("Failed to insert info on DB")
 			logging.error("Failed to insert info on DB")
@@ -62,7 +62,7 @@ def case_2(ip):
 	logging.info("IP {0} made {1} tries".format(ip, tries))
 	tries = int(tries) + 1
 	# Update DB
-	date = "{0}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+	date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 	print("Updating tries...")
 	logging.info("Updating tries...")
 	update_tries = update_row(ip=ip, field="TRIES", value=tries)
@@ -81,9 +81,18 @@ def case_2(ip):
 	elif update_date == "ok":
 		print("Successful updated date")
 		logging.info("Successful updated date")
+	print("Updating blocked date...")
+	logging.info("Updating blocked date...")
+	update_date = update_row(ip=ip, field="BLOCKED_DATE", value=date)
+	if update_date == "ko":
+		print("Failed to update date")
+		logging.error("Failed to update date")
+	elif update_date == "ok":
+		print("Successful updated date")
+		logging.info("Successful updated date")
 	print("Updating status...")
 	logging.info("Updating status...")
-	update_status = update_row(ip=ip, field="CURRENT_STATUS ", value="Blocked")
+	update_status = update_row(ip=ip, field="CURRENT_STATUS", value="Blocked")
 	if update_status == "ko":
 		print("Failed to update status")
 		logging.error("Failed to update status")
@@ -93,7 +102,7 @@ def case_2(ip):
 	print("Sending notification...")
 	logging.info("Sending notification...")
 	send_email(recipient=recipient,
-				msg="Blocking IP due to a scan try.\n\nIP: {0}\nTries:{1}\nDate: {2}".format(ip, tries, date))
+				msg="Blocking IP due to a scan try.\n\nIP:{0}\nTries:{1}\nDate: {2}".format(ip, tries, date))
 	return "ok"
 
 

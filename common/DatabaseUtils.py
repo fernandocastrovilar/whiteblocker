@@ -27,14 +27,15 @@ def init_db():
 
 
 # Function for insert data on DB
-def insert_db(ip, tries, location, current_status, first_view, last_view):
+def insert_db(ip, tries, location, current_status, blocked_date, unblocked_date, first_view, last_view):
 	conn = sqlite3.connect("whiteblocker.db")
 	try:
 		conn.execute("INSERT INTO RECORD \
 	(IP,TRIES,LOCATION,CURRENT_STATUS,BLOCKED_DATE,UNBLOCKED_DATE,FIRST_VIEW,LAST_VIEW)	\
 	VALUES \
-	('{0}', {1}, '{2}', '{3}', 'None', 'None', '{4}', '{5})".format(ip, tries, location, current_status,
-															first_view, last_view))
+	('{0}', {1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')".format(ip, tries, location, current_status,
+															blocked_date, unblocked_date, first_view,
+															last_view))
 		conn.commit()
 		return "ok"
 	except Exception as e:
