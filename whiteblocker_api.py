@@ -3,7 +3,7 @@ import datetime
 import ipaddress
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp
-from common.DatabaseUtils import insert_db, select_all, select_full_custom, update_row, init_db
+from common.DatabaseUtils import insert_db, select_all, select_full_custom, multiple_update_row, init_db
 from common.NotifyUtils import send_email
 
 
@@ -63,42 +63,15 @@ def case_2(ip):
 	tries = int(tries) + 1
 	# Update DB
 	date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-	print("Updating tries...")
-	logging.info("Updating tries...")
-	update_tries = update_row(ip=ip, field="TRIES", value=tries)
-	if update_tries == "ko":
-		print("Failed to update tries")
-		logging.error("Failed to update tries")
-	elif update_tries == "ok":
-		print("Successful updated tries")
-		logging.info("Successful updated tries")
-	print("Updating date...")
-	logging.info("Updating date...")
-	update_date = update_row(ip=ip, field="LAST_VIEW", value=date)
-	if update_date == "ko":
-		print("Failed to update date")
-		logging.error("Failed to update date")
-	elif update_date == "ok":
-		print("Successful updated date")
-		logging.info("Successful updated date")
-	print("Updating blocked date...")
-	logging.info("Updating blocked date...")
-	update_date = update_row(ip=ip, field="BLOCKED_DATE", value=date)
-	if update_date == "ko":
-		print("Failed to update date")
-		logging.error("Failed to update date")
-	elif update_date == "ok":
-		print("Successful updated date")
-		logging.info("Successful updated date")
-	print("Updating status...")
-	logging.info("Updating status...")
-	update_status = update_row(ip=ip, field="CURRENT_STATUS", value="Blocked")
-	if update_status == "ko":
-		print("Failed to update status")
-		logging.error("Failed to update status")
-	elif update_status == "ok":
-		print("Successful updated status")
-		logging.info("Successful updated status")
+	print("Updating DB info...")
+	logging.info("Updating DB info...")
+	update_db = multiple_update_row(ip=ip, conditions="'TRIES' = '{0}', 'LAST_VIEW' = '{1}', 'BLOCKED_DATE' = '{1}', 'CURRENT_STATUS' = 'Blocked'".format(tries, date))
+	if update_db == "ko":
+		print("Failed to update data")
+		logging.error("Failed to update data")
+	elif update_db == "ok":
+		print("Successful updated data")
+		logging.info("Successful updated data")
 	print("Sending notification...")
 	logging.info("Sending notification...")
 	send_email(recipient=recipient,

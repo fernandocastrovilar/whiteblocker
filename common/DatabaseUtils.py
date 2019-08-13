@@ -91,6 +91,18 @@ def update_row(ip, field, value):
 		return "ko"
 
 
+# Function to update multiple values
+def multiple_update_row(ip, conditions):
+	conn = sqlite3.connect("whiteblocker.db")
+	try:
+		conn.execute("UPDATE RECORD SET {0} WHERE IP = '{1}'".format(conditions, ip))
+		conn.commit()
+		return "ok"
+	except Exception as e:
+		print(e)
+		return "ko"
+
+
 # Function for drop table
 def drop_table():
 	conn = sqlite3.connect("whiteblocker.db")
