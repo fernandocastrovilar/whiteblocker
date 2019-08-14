@@ -5,7 +5,7 @@ import json
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp
 from common.DatabaseUtils import insert_db, select_all, select_full_custom, multiple_update_row, init_db
-from common.NotifyUtils import send_email
+from common.NotifyUtils import send_email, send_msg_bot
 
 with open("config.json") as config_file:
 	data = json.load(config_file)
@@ -44,8 +44,9 @@ def case_1(ip):
 		logging.info("Successful inserted data on DB")
 		print("Sending notification...")
 		logging.info("Sending notification...")
-		send_email(recipient=recipient,
-					msg="Blocking IP due to a scan try.\n\nIP: {0}\nTries: 1\nDate: {1}".format(ip, date))
+		message = "Blocking IP due to a scan try.\n\nIP: {0}\nTries: 1\nDate: {1}".format(ip, date)
+		send_email(recipient=recipient, msg=message)
+		send_msg_bot(msg=message)
 		return "ok"
 	except Exception as e:
 		print(e)
@@ -77,8 +78,9 @@ def case_2(ip):
 		logging.info("Successful updated data")
 	print("Sending notification...")
 	logging.info("Sending notification...")
-	send_email(recipient=recipient,
-				msg="Blocking IP due to a scan try.\n\nIP:{0}\nTries:{1}\nDate: {2}".format(ip, tries, date))
+	message = "Blocking IP due to a scan try.\n\nIP:{0}\nTries:{1}\nDate: {2}".format(ip, tries, date)
+	send_email(recipient=recipient, msg=message)
+	send_msg_bot(msg=message)
 	return "ok"
 
 
