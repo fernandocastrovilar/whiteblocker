@@ -6,7 +6,7 @@
         "smtp_server": "smtp.gmail.com"
     },
     "notifications_bot":{
-        "url": "",
+        "api_key": "",
         "chat_id": ""
     }
 }
