@@ -1,0 +1,12 @@
+{
+    "notifications":{
+        "username":"",
+        "password":"",
+        "recipient":"",
+        "smtp_server": "smtp.gmail.com"
+    },
+    "notifications_bot":{
+        "url": "",
+        "chat_id": ""
+    }
+}

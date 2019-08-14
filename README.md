@@ -16,11 +16,11 @@ pipenv install
 ## Configuration
 The only configuration needed is to set the correct parameters for having notifications working.
 
-To get email notifications, just write on "credentials.txt" the gmail account which is going to be used to send the emails:
-```bash
-echo "username:password" > credentials.txt
-```
-The other parameter is the account where you like to have the emails sent. This can be set editing "whitheblocker_api.py" on line 10, under parameter "recipient" variable.
+To get email notifications, just edit the "config.json" file editing the username/password with the credentials of your google account and the recipient with the email where you want to receive the notifications:
+
+The other part of the config file is for set the parameters from a telegram bot, which can be used too to receive live notifications about events on WhiteBlocker.
+
+For this, you will need to edit your bot URL and your chat ID.
 
 ## Roadmap
 - Create the agent who listen on a unused system port and notify of a TCP handshake.

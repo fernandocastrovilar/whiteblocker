@@ -1,13 +1,16 @@
 import logging
 import datetime
 import ipaddress
+import json
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp
 from common.DatabaseUtils import insert_db, select_all, select_full_custom, multiple_update_row, init_db
 from common.NotifyUtils import send_email
 
-
-recipient = ""
+with open("config.json") as config_file:
+	data = json.load(config_file)
+notifications = data['notifications']
+recipient = notifications['recipient']
 
 
 # Case 1: IP not blocked and not in DB
