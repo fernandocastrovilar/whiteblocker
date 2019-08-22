@@ -2,6 +2,9 @@ import logging
 import datetime
 import ipaddress
 import json
+import re
+from concurrent.futures import ThreadPoolExecutor
+from dateutil.parser import parse
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp
 from common.DatabaseUtils import insert_db, select_all, select_full_custom, multiple_update_row, init_db
@@ -84,8 +87,8 @@ def case_2(ip):
 	return "ok"
 
 
-# Main function
-def main():
+# Main function for whiteblocker
+def whiteblocker_process():
 	init_db()
 	while True:
 		print("opening socket")
@@ -108,6 +111,61 @@ def main():
 		else:
 			print("Changing socket port due to timeout waiting for connection")
 			logging.warning("Changing socket port due to timeout waiting for connection")
+
+
+# Function for unblock old IPs
+def whiblocker_unblocker():
+	while True:
+		""" Tiers:
+		Tier 1: 1 week blocked = 1 Try
+		Tier 2: 15 days blocked = 2 Tries
+		TIer 3: 1 month blocked = 3 Tries
+		Tier 4: 3 months blocked = 4 Tries
+		Tier 5: 6 months blocked = 5 Tries
+		Tier 6: Permanent blocked = 6 Tries
+		"""
+		current_date = parse(str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
+		blocked_ips = select_full_custom(field="IP", condition="CURRENT_STATUS", match="Blocked")
+		if blocked_ips == "ko":
+			print("Error getting IPs blocked")
+			logging.error("Error getting IPs blocked")
+			return "ko"
+		for ip in blocked_ips:
+			ip = str(re.findall(r'[0-9]+(?:\.[0-9]+){3}', str(ip))).replace('[', '').replace(']', '').replace('\'', '')
+			blocked_date = str(select_full_custom(field="BLOCKED_DATE", condition="IP", match=ip))
+			if blocked_date == "ko":
+				print("Error getting IPs blocked date")
+				logging.error("Error getting IPs blocked date")
+				return "ko"
+			for elem in ["[", "]", "(", ")", "'", ","]:
+				if elem in blocked_date:
+					blocked_date = blocked_date.replace(elem, '')
+			print("The IP {0} was blocked on {1}".format(ip, blocked_date))
+			last_date = parse(blocked_date)
+			time = int(str((current_date - last_date)).split(' ', 1)[0])
+			print(time)
+			tries = str(select_full_custom(field="TRIES", condition="IP", match=ip))
+			tries = int(''.join(list(filter(str.isdigit, tries))))
+			print(tries)
+			if time >= 7 and tries == 1:
+				print("Something to unblock")
+			elif time >= 15 and tries == 2:
+				print("Something to unblock")
+			elif time >= 30 and tries == 3:
+				print("Something to unblock")
+			elif time >= 90 and tries == 4:
+				print("Something to unblock")
+			elif time >= 180 and tries == 5:
+				print("Something to unblock")
+			elif time >= 365 and tries == 6:
+				print("This is permanent blocked!")
+		return "ok"
+
+
+def main():
+	pool = ThreadPoolExecutor(max_workers=2)
+	pool.submit(whiteblocker_process)
+	pool.submit(whiblocker_unblocker)
 
 
 if __name__ == "__main__":
