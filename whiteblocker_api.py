@@ -111,4 +111,8 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	try:
+		main()
+	except KeyboardInterrupt:
+		print("^C received, shutting down the web server")
+		exit("Exit")
