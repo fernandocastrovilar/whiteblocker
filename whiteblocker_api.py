@@ -1,9 +1,12 @@
 import logging
-from common.ApiUtils import whiteblocker_process, whiteblocker_unblock
+from common.ApiUtils import whiteblocker_process, whiteblocker_unblock, check_system
 from concurrent.futures import ThreadPoolExecutor
 
 
 def main():
+	check = check_system()
+	if check == "ko":
+		raise Exception("Iptables is not installed")
 	pool = ThreadPoolExecutor(max_workers=2)
 	pool.submit(whiteblocker_process)
 	pool.submit(whiteblocker_unblock)

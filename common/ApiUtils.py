@@ -3,6 +3,8 @@ import datetime
 import ipaddress
 import json
 import re
+import apt
+import time as tm
 from dateutil.parser import parse
 from common.SocketUtils import open_listen_socket
 from common.SecurityUtils import block_ip, LocateIp, unblock_ip
@@ -94,7 +96,7 @@ def unblock(ip):
 		print("Error unblocking IP {0}".format(ip))
 		logging.error("Error unblocking IP {0}".format(ip))
 		return "ko"
-	update_db = multiple_update_row(conditions="CURRENT_STATUS = 'Unblocked' UNBLOCKED_DATE = '" + date + "'", ip=ip)
+	update_db = multiple_update_row(conditions="CURRENT_STATUS = 'Unblocked', UNBLOCKED_DATE = '" + date + "'", ip=ip)
 	if update_db == "ko":
 		print("Error updating DB")
 		logging.error("Error updating DB")
@@ -157,10 +159,8 @@ def whiteblocker_unblock():
 			print("The IP {0} was blocked on {1}".format(ip, blocked_date))
 			last_date = parse(blocked_date)
 			time = int(str((current_date - last_date)).split(' ', 1)[0])
-			print(time)
 			tries = str(select_full_custom(field="TRIES", condition="IP", match=ip))
 			tries = int(''.join(list(filter(str.isdigit, tries))))
-			print(tries)
 			if time >= 7 and tries == 1:
 				ip_unblock = unblock(ip=ip)
 				if ip_unblock == "ko":
@@ -208,4 +208,19 @@ def whiteblocker_unblock():
 					logging.info("Successful unblocked IP {0}".format(ip))
 			elif time >= 365 and tries == 6:
 				print("This is permanent blocked!")
+			else:
+				break
+		tm.sleep(1800)
+
+
+# Function for check if the system software requirements is compliment
+def check_system():
+	cache = apt.Cache()
+	if cache["iptables"].is_installed:
+		print("Iptables is correctly installed")
+		logging.info("Iptables is correctly installed")
 		return "ok"
+	else:
+		print("Iptablets it's not installed. Your should run 'apt install -y iptables'")
+		logging.error("Iptablets it's not installed. Your should run 'apt install -y iptables'")
+		return "ko"
