@@ -6,7 +6,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from dateutil.parser import parse
 from common.SocketUtils import open_listen_socket
-from common.SecurityUtils import block_ip, LocateIp
+from common.SecurityUtils import block_ip, LocateIp, unblock_ip
 from common.DatabaseUtils import insert_db, select_all, select_full_custom, multiple_update_row, init_db
 from common.NotifyUtils import send_email, send_msg_bot
 
@@ -87,6 +87,21 @@ def case_2(ip):
 	return "ok"
 
 
+# Unblock IP after time pass
+def unblock(ip):
+	date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+	ip_tables = unblock_ip(ip=ip)
+	if ip_tables == "ko":
+		print("Error unblocking IP {0}".format(ip))
+		logging.error("Error unblocking IP {0}".format(ip))
+		return "ko"
+	update_db = multiple_update_row(conditions="CURRENT_STATUS = 'Unblocked' UNBLOCKED_DATE = '" + date + "'", ip=ip)
+	if update_db == "ko":
+		print("Error updating DB")
+		logging.error("Error updating DB")
+		return "ko"
+
+
 # Main function for whiteblocker
 def whiteblocker_process():
 	init_db()
@@ -114,7 +129,7 @@ def whiteblocker_process():
 
 
 # Function for unblock old IPs
-def whiblocker_unblocker():
+def whiteblocker_unblock():
 	while True:
 		""" Tiers:
 		Tier 1: 1 week blocked = 1 Try
@@ -148,15 +163,50 @@ def whiblocker_unblocker():
 			tries = int(''.join(list(filter(str.isdigit, tries))))
 			print(tries)
 			if time >= 7 and tries == 1:
-				print("Something to unblock")
+				ip_unblock = unblock(ip=ip)
+				if ip_unblock == "ko":
+					print("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					logging.error("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					raise Exception
+				else:
+					print("Successful unblocked IP {0}".format(ip))
+					logging.info("Successful unblocked IP {0}".format(ip))
 			elif time >= 15 and tries == 2:
-				print("Something to unblock")
+				ip_unblock = unblock(ip=ip)
+				if ip_unblock == "ko":
+					print("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					logging.error("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					raise Exception
+				else:
+					print("Successful unblocked IP {0}".format(ip))
+					logging.info("Successful unblocked IP {0}".format(ip))
 			elif time >= 30 and tries == 3:
-				print("Something to unblock")
+				ip_unblock = unblock(ip=ip)
+				if ip_unblock == "ko":
+					print("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					logging.error("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					raise Exception
+				else:
+					print("Successful unblocked IP {0}".format(ip))
+					logging.info("Successful unblocked IP {0}".format(ip))
 			elif time >= 90 and tries == 4:
-				print("Something to unblock")
+				ip_unblock = unblock(ip=ip)
+				if ip_unblock == "ko":
+					print("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					logging.error("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					raise Exception
+				else:
+					print("Successful unblocked IP {0}".format(ip))
+					logging.info("Successful unblocked IP {0}".format(ip))
 			elif time >= 180 and tries == 5:
-				print("Something to unblock")
+				ip_unblock = unblock(ip=ip)
+				if ip_unblock == "ko":
+					print("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					logging.error("Failed to unblock IP {0}, contact sysadmin".format(ip))
+					raise Exception
+				else:
+					print("Successful unblocked IP {0}".format(ip))
+					logging.info("Successful unblocked IP {0}".format(ip))
 			elif time >= 365 and tries == 6:
 				print("This is permanent blocked!")
 		return "ok"
@@ -165,7 +215,7 @@ def whiblocker_unblocker():
 def main():
 	pool = ThreadPoolExecutor(max_workers=2)
 	pool.submit(whiteblocker_process)
-	pool.submit(whiblocker_unblocker)
+	pool.submit(whiteblocker_unblock)
 
 
 if __name__ == "__main__":
@@ -173,4 +223,8 @@ if __name__ == "__main__":
 		main()
 	except KeyboardInterrupt:
 		print("^C received, shutting down the web server")
+		logging.error("^C received, shutting down the web server")
 		exit("Exit")
+	except Exception as e:
+		print(e)
+		logging.error(e)
