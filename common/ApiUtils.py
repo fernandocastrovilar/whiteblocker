@@ -3,7 +3,8 @@ import datetime
 import ipaddress
 import json
 import re
-import apt
+#import apt
+#import subprocess
 import time as tm
 from dateutil.parser import parse
 from common.SocketUtils import open_listen_socket
@@ -229,13 +230,13 @@ def whiteblocker_unblock():
 
 
 # Function for check if the system software requirements is compliment
-def check_system():
-	cache = apt.Cache()
-	if cache["iptables"].is_installed:
-		print("Iptables is correctly installed")
-		logging.info("Iptables is correctly installed")
-		return "ok"
-	else:
-		print("Iptablets it's not installed. Your should run 'apt install -y iptables'")
-		logging.error("Iptablets it's not installed. Your should run 'apt install -y iptables'")
-		return "ko"
+#def check_system():
+#	cache = apt.Cache()
+#	if cache["iptables"].is_installed:
+#		print("Iptables is correctly installed")
+#		logging.info("Iptables is correctly installed")
+#		return "ok"
+#	else:
+#		print("Iptablets it's not installed. Your should run 'apt install -y iptables'")
+#		logging.error("Iptablets it's not installed. Your should run 'apt install -y iptables'")
+#		return "ko"
