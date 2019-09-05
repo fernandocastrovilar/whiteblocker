@@ -10,6 +10,9 @@ random2 = "*"
 jsonlib-python3 = "*"
 requests = "*"
 ipaddress = "*"
+python-dateutil = "*"
+threaded = "*"
+futures = "*"
 
 [dev-packages]
 
