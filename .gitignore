@@ -2,3 +2,4 @@
 config.json
 whiteblocker.db
 api.log
+*.pyc
