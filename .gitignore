@@ -1,0 +1,4 @@
+# Don't track this content
+config.json
+whiteblocker.db
+api.log
