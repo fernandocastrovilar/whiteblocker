@@ -1,3 +1,4 @@
+/* Main style */
 * {
 box-sizing: border-box;
 }
@@ -112,3 +113,42 @@ margin-top: 12px;
   margin-top: 30px; /* Add a top margin to avoid content overlay */
 }
 
+
+/* Table style */
+table.paleBlueRows {
+  background-color: #ffc4ff;
+  width: 90%;
+  height: 250px;
+  text-align: center;
+  border-collapse: collapse;
+}
+table.paleBlueRows tbody td {
+  font-size: 13px;
+  font-weight: bold;
+}
+table.paleBlueRows tr:nth-child(even) {
+  background: #ce93d8;
+}
+table.paleBlueRows thead {
+  background: #9c64a6;
+}
+table.paleBlueRows thead th {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000000;
+  text-align: center;
+}
+table.paleBlueRows thead th:first-child {
+  border-left: none;
+}
+
+table.paleBlueRows tfoot td {
+  font-size: 14px;
+}
+
+
+canvas {
+    background: #ce93d8;
+    width:50%;
+    height:50%;
+    }​

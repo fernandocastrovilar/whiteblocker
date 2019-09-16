@@ -1,6 +1,7 @@
 import logging
 import os
 import whiteblocker_api
+from common.DatabaseUtils import select_all
 from flask import Flask, flash, redirect, render_template, request, session, send_from_directory
 from threading import Thread
 
@@ -21,7 +22,22 @@ def home():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
-        return render_template('home.html')
+        data = select_all()
+        ips = []
+        tries = []
+        location = []
+        status = []
+        last_view = []
+        for i in data:
+            ips.append(i[0])
+            tries.append(i[1])
+            location.append(i[2])
+            status.append(i[3])
+            last_view.append(i[7])
+
+        bar_labels = ips
+        bar_values = tries
+        return render_template('home.html', max=17000, labels=bar_labels, values=bar_values)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -55,7 +71,8 @@ def list_whiteblocker():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
-        return render_template('home.html')
+        rows = select_all()
+        return render_template('list.html', rows=rows)
 
 
 @app.route('/manual')
@@ -63,7 +80,7 @@ def manual_whiteblocker():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
-        return render_template('home.html')
+        return render_template('manual.html')
 
 
 @app.route('/help')
@@ -77,9 +94,6 @@ def help_whiteblocker():
 if __name__ == "__main__":
     try:
         app.secret_key = os.urandom(12)
-        #check = check_system()
-        #if check == "ko":
-        #	raise Exception("Iptables is not installed")
         Thread(target=whiteblocker_api.main()).start()
         Thread(target=app.run(host="0.0.0.0", debug=True)).start()
     except KeyboardInterrupt:
