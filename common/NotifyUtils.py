@@ -1,6 +1,7 @@
 import smtplib
 import json
 import requests
+import logging
 
 
 # Function for send email using an existing gmail account
@@ -11,6 +12,10 @@ def send_email(recipient, msg):
 
 	smtp_server = notifications['smtp_server']
 	smtp_user = notifications['username']
+	if not smtp_user:
+		print("Not email configured for notifications")
+		logging.error("Not email configured for notifications")
+		return "ko"
 	smtp_pass = notifications['password']
 
 	recipients = recipient
@@ -35,6 +40,10 @@ def send_msg_bot(msg):
 	notifications_bot = data['notifications_bot']
 
 	api_key = notifications_bot['api_key']
+	if not api_key:
+		print("Not telegram configured")
+		logging.error("Not telegram configured")
+		return "ko"
 	chat_id = notifications_bot['chat_id']
 	url = "https://api.telegram.org/bot" + api_key + "/sendMessage"
 	querystring = {
@@ -53,6 +62,10 @@ def send_gif_bot(gif_url):
 	notifications_bot = data['notifications_bot']
 
 	api_key = notifications_bot['api_key']
+	if not api_key:
+		print("Not telegram configured")
+		logging.error("Not telegram configured")
+		return "ko"
 	chat_id = notifications_bot['chat_id']
 	url = "https://api.telegram.org/bot" + api_key + "/sendAnimation"
 	querystring = {
