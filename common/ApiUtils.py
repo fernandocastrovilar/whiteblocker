@@ -3,8 +3,7 @@ import datetime
 import ipaddress
 import json
 import re
-#import apt
-#import subprocess
+import subprocess
 import time as tm
 from dateutil.parser import parse
 from common.SocketUtils import open_listen_socket
@@ -230,13 +229,70 @@ def whiteblocker_unblock():
 
 
 # Function for check if the system software requirements is compliment
-#def check_system():
-#	cache = apt.Cache()
-#	if cache["iptables"].is_installed:
-#		print("Iptables is correctly installed")
-#		logging.info("Iptables is correctly installed")
-#		return "ok"
-#	else:
-#		print("Iptablets it's not installed. Your should run 'apt install -y iptables'")
-#		logging.error("Iptablets it's not installed. Your should run 'apt install -y iptables'")
-#		return "ko"
+def check_system():
+	script = "dpkg -s nftables | grep Status"
+	result = subprocess.call(script, shell=True)
+	if result == 0:
+		print("Nftables is correctly installed")
+		logging.info("Nftables is correctly installed")
+		return "ok"
+	else:
+		print("Nftables it's not installed.")
+		logging.error("Nftables it's not installed.")
+		try:
+			result = configure_nftables()
+			if result == "ko":
+				print("Failed to configure nftables")
+				logging.error("Failed to configure nftables")
+				return "ko"
+			else:
+				return "ok"
+		except Exception as e:
+			print(e)
+			logging.error(e)
+			return "ko"
+
+
+# Function for configure nftables services
+def configure_nftables():
+	try:
+		print("Trying to installing nftables...")
+		logging.info("Trying to installing nftables...")
+		script = "apt-get install -y nftables"
+		result = subprocess.call(script, shell=True)
+		if result == 0:
+			print("Corrected installed nftables")
+			logging.info("Corrected installed nftables")
+		else:
+			print("Failed to install nftables, manual intervention is needed")
+			logging.error("Failed to install nftables, manual intervention is needed")
+			return "ko"
+	except Exception as e:
+		print(e)
+		logging.error(e)
+		return "ko"
+	print("Creating service and enabling")
+	logging.info("Creating service and enabling")
+	script = "cp linux_files/firewall.service /etc/systemd/system/firewall.service && systemctl enable firewall.service"
+	result = subprocess.call(script, shell=True)
+	if result != 0:
+		print("Failed to setup Nftables")
+		logging.error("Failed to setup Nftables")
+		return "ko"
+	print("Coping nftables initial config")
+	logging.info("Coping nftables initial config")
+	script = "mkdir /etc/firewall && cp linux_files/nftables.cfg /etc/firewall/"
+	result = subprocess.call(script, shell=True)
+	if result != 0:
+		print("Failed to setup Nftables")
+		logging.error("Failed to setup Nftables")
+		return "ko"
+	script = "systemctl start firewall.service"
+	result = subprocess.call(script, shell=True)
+	if result == 0:
+		print("Nftables is successfully started")
+		logging.info("Nftables is successfully started")
+	else:
+		print("Nftables isn't correctly started")
+		logging.error("Nftables isn't correctly started")
+		return "ko"

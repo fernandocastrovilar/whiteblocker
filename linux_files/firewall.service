@@ -1,0 +1,11 @@
+[Unit]
+Description=Enable firewall and NAT
+
+[Service]
+Type=oneshot
+ExecStart=/etc/firewall/nftables.cfg
+ExecStop=/etc/firewall/nftables.cfg stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
