@@ -8,7 +8,7 @@ from threading import Thread
 
 # Create the application instance
 app = Flask(__name__)
-logging.basicConfig(filename="api.log", filemode="w", format="%(name)s - %(levelname)s - %(message)s",
+logging.basicConfig(filename="api.log", filemode="w", format="%(asctime)s %(name)s - %(levelname)s - %(message)s",
                     level=logging.INFO)
 
 

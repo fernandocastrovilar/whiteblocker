@@ -2,6 +2,9 @@ import logging
 from common.ApiUtils import whiteblocker_process, whiteblocker_unblock, check_system
 from concurrent.futures import ThreadPoolExecutor
 
+logging.basicConfig(filename="api.log", filemode="w", format="%(asctime)s %(name)s - %(levelname)s - %(message)s",
+					level=logging.INFO)
+
 
 def main():
 	check = check_system()
