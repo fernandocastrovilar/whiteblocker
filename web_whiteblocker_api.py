@@ -57,7 +57,9 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect('/home')
+    info = "Logged Out Successfully"
+    flash(info)
+    return render_template('login.html', error=info)
 
 
 @app.route('/favicon.ico')
