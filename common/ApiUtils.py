@@ -4,6 +4,7 @@ import ipaddress
 import json
 import re
 import subprocess
+import platform
 import time as tm
 from dateutil.parser import parse
 from common.SocketUtils import open_listen_socket
@@ -230,6 +231,25 @@ def whiteblocker_unblock():
 
 # Function for check if the system software requirements is compliment
 def check_system():
+	so = check_so()
+	software = check_software()
+	if so == "ok" and software == "ok":
+		return "ok"
+	else:
+		return "ko"
+
+
+# Function for check the compatibility with the SO
+def check_so():
+	so = platform.system()
+	if "Linux" in so:
+		return "ok"
+	else:
+		return "ko"
+
+
+# Function for check if the necessary software are running/installed/stopped... And fix it.
+def check_software():
 	script = "dpkg -s nftables | grep Status"
 	result = subprocess.call(script, shell=True)
 	if result == 0:
