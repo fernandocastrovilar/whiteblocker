@@ -2,6 +2,7 @@ import logging
 import os
 import whiteblocker_api
 from common.DatabaseUtils import select_all
+from common.ApiUtils import unblock, case_3 as block
 from flask import Flask, flash, redirect, render_template, request, session, send_from_directory
 from threading import Thread
 
@@ -77,11 +78,35 @@ def list_whiteblocker():
         return render_template('list.html', rows=rows)
 
 
-@app.route('/manual')
+@app.route('/manual', methods=['GET', 'POST'])
 def manual_whiteblocker():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
+        if request.method == 'POST':
+            action = request.form['action']
+            ip = request.form['ip']
+            if action == "Block":
+                tier = request.form['tier']
+                process = block(ip=ip, tier=tier)
+                if process == "ok":
+                    msg = "Correctly blocked IP {0}".format(ip)
+                    flash(msg)
+                    return render_template('manual.html', msg=msg)
+                else:
+                    msg = "Failed to block IP {0}".format(ip)
+                    flash(msg)
+                    return render_template('manual.html', msg=msg)
+            elif action == "Unblock":
+                process = unblock(ip=ip)
+                if process == "ok":
+                    msg = "Correctly unblocked IP {0}".format(ip)
+                    flash(msg)
+                    return render_template('manual.html', msg=msg)
+                else:
+                    msg = "Failed to unblocked IP {0}".format(ip)
+                    flash(msg)
+                    return render_template('manual.html', msg=msg)
         return render_template('manual.html')
 
 

@@ -58,7 +58,7 @@ def case_1(ip):
 		return "ko"
 
 
-# Case 2:IP is not blocked but it's already listed on DB
+# Case 2: IP is not blocked but it's already listed on DB
 def case_2(ip):
 	block = block_ip(ip=ip)
 	if block == "ko":
@@ -89,6 +89,40 @@ def case_2(ip):
 	return "ok"
 
 
+# Case 3: Manual block
+def case_3(ip, tier):
+	block = block_ip(ip=ip)
+	if block == "ko":
+		print("Failed to block the IP {0}, manual action is required".format(ip))
+		logging.error("Failed to block the IP {0}, manual action is required".format(ip))
+
+	# Get IP info
+	ip_data = LocateIp(ip)
+	location = str(ip_data.country_name()) + ", " + str(ip_data.state())
+	print("The blocked IP is from {0}".format(location))
+	logging.info("The blocked IP is from {0}".format(location))
+
+	# Write IP, date and info to DB
+	print("Writing info on DB...")
+	logging.info("Writing info on DB...")
+	date = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+	try:
+		result = insert_db(ip=ip, tries=tier, location=location, current_status="Blocked", blocked_date=date, unblocked_date="None", first_view=date, last_view=date)
+		if result == "ko":
+			print("Failed to insert info on DB")
+			logging.error("Failed to insert info on DB")
+			return "ko"
+		row_inserted = select_full_custom(field="*", condition="IP", match=ip)
+		print(row_inserted)
+		logging.info(row_inserted)
+		print("Successful inserted data on DB")
+		logging.info("Successful inserted data on DB")
+		return "ok"
+	except Exception as e:
+		print(e)
+		return "ko"
+
+
 # Unblock IP after time pass
 def unblock(ip):
 	date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -97,7 +131,8 @@ def unblock(ip):
 		print("Error unblocking IP {0}".format(ip))
 		logging.error("Error unblocking IP {0}".format(ip))
 		return "ko"
-	update_db = multiple_update_row(conditions="CURRENT_STATUS = 'Unblocked', UNBLOCKED_DATE = '" + date + "'", ip=ip)
+	else:
+		update_db = multiple_update_row(conditions="CURRENT_STATUS = 'Unblocked', UNBLOCKED_DATE = '" + date + "'", ip=ip)
 	if update_db == "ko":
 		print("Error updating DB")
 		logging.error("Error updating DB")
@@ -136,7 +171,7 @@ def whiteblocker_unblock():
 		""" Tiers:
 		Tier 1: 1 week blocked = 1 Try
 		Tier 2: 15 days blocked = 2 Tries
-		TIer 3: 1 month blocked = 3 Tries
+		Tier 3: 1 month blocked = 3 Tries
 		Tier 4: 3 months blocked = 4 Tries
 		Tier 5: 6 months blocked = 5 Tries
 		Tier 6: Permanent blocked = 6 Tries

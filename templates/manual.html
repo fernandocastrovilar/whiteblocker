@@ -15,8 +15,67 @@
     <a href="/logout">Logout</a>
 </div>
 
-<div class="main">
-  <p>Some text some text some text some text..</p>
+<div class="form-style-6">
+  {% block body %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+                {{ message }}
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+    <form action="/manual" method="POST">
+  <p>IP*: <input type="text" name="ip" size="40"></p>
+  <p>Tier: <select name="tier">
+    <option value ="1">1</option>
+    <option value ="2">2</option>
+    <option value ="3">3</option>
+    <option value ="4">4</option>
+    <option value ="5">5</option>
+    <option value ="6">6</option>
+    </select>
+        <style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;border-color:#bbb;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;border-top-width:1px;border-bottom-width:1px;border-color:#bbb;color:#594F4F;background-color:#E0FFEB;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;border-top-width:1px;border-bottom-width:1px;border-color:#bbb;color:#493F3F;background-color:#9DE0AD;}
+.tg .tg-3y7r{background-color:#ce93d8;font-weight:bold;font-size:11px;text-align:left;vertical-align:top}
+.tg .tg-galr{font-weight:bold;font-size:11px;background-color:#9c64a6;text-align:left;vertical-align:top}
+.tg .tg-8xlv{font-weight:bold;font-size:11px;background-color:#ffc4ff;text-align:left;vertical-align:top}
+.tg .tg-4fb1{background-color:#ffc4ff;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <td class="tg-galr">Tier Definition</td>
+  </tr>
+  <tr>
+    <td class="tg-3y7r">Tier 1: 1 week blocked</td>
+  </tr>
+  <tr>
+    <td class="tg-8xlv">Tier 2: 15 days blocked</td>
+  </tr>
+  <tr>
+    <td class="tg-3y7r">Tier 3: 1 month blocked</td>
+  </tr>
+  <tr>
+    <td class="tg-8xlv">Tier 4: 3 months blocked</td>
+  </tr>
+  <tr>
+    <td class="tg-3y7r">Tier 5: 6 months blocked</td>
+  </tr>
+  <tr>
+    <td class="tg-8xlv">Tier 6: Permanent blocked</td>
+  </tr>
+</table>
+  <p>Action*:
+    <input type="radio" name="action" value="Block" class="form-radio"> Block
+    <input type="radio" name="action" value="Unblock" class="form-radio"> Unblock
+  </p>
+  <p>
+    <input type="reset" value="Clear">
+    <input type="submit" value="Send">
+  </p>
+</form>
+  {% endblock %}
 </div>
 </body>
 </html>
