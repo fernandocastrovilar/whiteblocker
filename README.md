@@ -14,7 +14,9 @@ pipenv install
 ```
 
 ## Configuration
-The only configuration needed is to set the correct parameters for having notifications working.
+The only configuration needed is to set the correct parameters for having notifications working and credentials for login into the web interface.
+
+To change the default username/password of web app, on config.json should change the param "username" and "password" with the one you want.
 
 To get email notifications, just edit the "config.json" file editing the username/password with the credentials of your google account and the recipient with the email where you want to receive the notifications:
 
