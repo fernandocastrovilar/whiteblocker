@@ -1,11 +1,19 @@
 import logging
 import os
+import json
 import whiteblocker_api
 from common.DatabaseUtils import select_all
 from common.ApiUtils import unblock, case_3 as block
 from flask import Flask, flash, redirect, render_template, request, session, send_from_directory
 from threading import Thread
 
+
+# Credentials for web login
+with open("config.json") as config_file:
+    data = json.load(config_file)
+    credentials = data['web_credentials']
+    username = credentials['username']
+    password = credentials['password']
 
 # Create the application instance
 app = Flask(__name__)
@@ -45,7 +53,7 @@ def home():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+        if request.form['username'] != username or request.form['password'] != password:
             error = "Invalid Credentials. Please, try again."
             flash(error)
             return render_template('login.html')

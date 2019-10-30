@@ -8,5 +8,9 @@
     "notifications_bot":{
         "api_key": "",
         "chat_id": ""
+    },
+    "web_credentials": {
+        "username": "admin",
+        "password": "admin"
     }
 }
