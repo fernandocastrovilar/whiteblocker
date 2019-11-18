@@ -1,11 +1,11 @@
 import logging
 import subprocess
 import requests
+import re
 
 
 # Function for block an IP
 def block_ip(ip):
-	script = "/sbin/iptables -A INPUT -s " + ip + " -j DROP"
 	# Check if ip is already blocked
 	ip_status = check_if_ip_is_blocked(ip=ip)
 	if ip_status == "blocked":
@@ -14,41 +14,111 @@ def block_ip(ip):
 		return "Ip {0} is already blocked".format(ip)
 	elif ip_status == "unblocked":
 		try:
-			print("Blocking IP: {0}".format(ip))
-			logging.info("Blocking IP: {0}".format(ip))
+			add_ip_nftables(ip=ip)
+			script = "cp linux_files/nftables.cfg /etc/firewall/"
 			result = subprocess.call(script, shell=True)
-			# If result = 0 command success, if different command failed
+			if result != 0:
+				print("Failed to setup block IP {0}".format(ip))
+				logging.error("Failed to block IP {0}".format(ip))
+				return "ko"
+			script = "systemctl restart firewall.service"
+			result = subprocess.call(script, shell=True)
 			if result == 0:
-				print("IP {0} successfully blocked".format(ip))
-				logging.info("IP {0} successfully blocked".format(ip))
-				return "ok"
+				print("Nftables is successfully started")
+				logging.info("Nftables is successfully started")
+				result = check_if_ip_is_blocked(ip=ip)
+				if result == "blocked":
+					print("IP {0} correctly blocked".format(ip))
+					logging.info("IP {0} correctly blocked".format(ip))
+					return "ok"
+				elif result == "unblocked":
+					print("IP {0} not blocked correctly".format(ip))
+					logging.error("IP {0} not blocked correctly".format(ip))
+					return "ko"
 			else:
-				print("IP {0} unsuccessfully blocked".format(ip))
-				logging.error("IP {0} unsuccessfully blocked".format(ip))
+				print("Nftables isn't correctly started")
+				logging.error("Nftables isn't correctly started")
 				return "ko"
 		except Exception as e:
 			print(e)
 			return "ko"
 
 
+# Function for search variable and replace it
+def add_ip_nftables(ip):
+	filename = "linux_files/nftables.cfg"
+	key = "IP_RANGE"
+	f = open(filename, "r")
+	lines = f.readlines()
+	f.close()
+	for i, line in enumerate(lines):
+		if line.split('=')[0] == key:
+			ips = line.split('=')[1].replace("\"", "").replace("\n", "")
+			if "." not in ips:
+				lines[i] = key + '=' + "\"{ " + ip + " }\"" + "\n"
+			else:
+				lines[i] = key + '=' + "\"{ " + ips + ", " + ip + " }\"" + "\n"
+	f = open(filename, "w")
+	f.write("".join(lines))
+	f.close()
+
+
+# Delete IP from nftables config
+def delete_ip_nftables(ip):
+	filename = "linux_files/nftables.cfg"
+	key = "IP_RANGE"
+	f = open(filename, "r")
+	lines = f.readlines()
+	f.close()
+	for i, line in enumerate(lines):
+		if line.split('=')[0] == key:
+			ips = line.split('=')[1].replace("\"", "").replace("}", "").replace("{", "").replace(",", " ").replace(ip, "")\
+				.replace("\n", "")
+			ips = re.sub(" +", ",", ips).rstrip(",")
+			if ips.startswith(","):
+				ips.replace(",", "", 1)
+			if "." in ips:
+				lines[i] = key + '=' + "\"{ " + ips + " }\"" + "\n"
+			elif "." not in ips:
+				lines[i] = key + '=' + "\"{ " + " }\"" + "\n"
+
+	f = open(filename, "w")
+	f.write("".join(lines))
+	f.close()
+
+
 # Function for unblock an IP
 def unblock_ip(ip):
-	script = "/sbin/iptables -D INPUT -s " + ip + " -j DROP"
 	# Check if ip is blocked
 	ip_status = check_if_ip_is_blocked(ip=ip)
 	if ip_status == "blocked":
 		try:
 			print("Unblocking IP: {0}".format(ip))
 			logging.info("Unblocking IP: {0}".format(ip))
+			delete_ip_nftables(ip=ip)
+			script = "cp linux_files/nftables.cfg /etc/firewall/"
 			result = subprocess.call(script, shell=True)
-			# If result = 0 command success, if different command failed
+			if result != 0:
+				print("Failed to setup block IP {0}".format(ip))
+				logging.error("Failed to block IP {0}".format(ip))
+				return "ko"
+			script = "systemctl restart firewall.service"
+			result = subprocess.call(script, shell=True)
 			if result == 0:
-				print("IP {0} successfully unblocked".format(ip))
-				logging.info("IP {0} successfully unblocked".format(ip))
-				return "ok"
+				print("Nftables is successfully started")
+				logging.info("Nftables is successfully started")
+				result = check_if_ip_is_blocked(ip=ip)
+				if result == "blocked":
+					print("IP {0} correctly blocked".format(ip))
+					logging.info("IP {0} correctly blocked".format(ip))
+					return "ok"
+				elif result == "unblocked":
+					print("IP {0} not blocked correctly".format(ip))
+					logging.error("IP {0} not blocked correctly".format(ip))
+					return "ko"
 			else:
-				print("IP {0} unsuccessfully unblocked".format(ip))
-				logging.error("IP {0} unsuccessfully unblocked".format(ip))
+				print("Nftables isn't correctly started")
+				logging.error("Nftables isn't correctly started")
 				return "ko"
 		except Exception as e:
 			print(e)
@@ -61,14 +131,12 @@ def unblock_ip(ip):
 
 # Function for check if an IP is already or not blocked
 def check_if_ip_is_blocked(ip):
-	script = "/sbin/iptables -L | grep " + ip
 	try:
-		result = subprocess.call(script, shell=True)
-	# If result = 0 the ip is already blocked, if different the IP is not blocked yet
-		if result == 0:
-			return "blocked"
-		else:
-			return "unblocked"
+		with open("linux_files/nftables.cfg") as f:
+			if ip in f.read():
+				return "blocked"
+			else:
+				return "unblocked"
 	except Exception as e:
 		print(e)
 		return "ko"
@@ -76,10 +144,15 @@ def check_if_ip_is_blocked(ip):
 
 # Function for retrieve the complete list of blocked IPs
 def get_blocked_ip():
-	script = "/sbin/iptables -L INPUT -v -n"
-	p = subprocess.Popen(script, stdin=subprocess.PIPE, shell=True)
-	blocked_ip = p.communicate()[0]
-	print(blocked_ip)
+	blocked_ip = ""
+	filename = "linux_files/nftables.cfg"
+	key = "IP_RANGE"
+	f = open(filename, "r")
+	lines = f.readlines()
+	f.close()
+	for i, line in enumerate(lines):
+		if line.split('=')[0] == key:
+			blocked_ip = line.split('=')[1].replace("\"", "").replace("\n", "")
 	return blocked_ip
 
 
