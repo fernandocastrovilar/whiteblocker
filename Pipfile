@@ -12,7 +12,7 @@ requests = "*"
 ipaddress = "*"
 python-dateutil = "*"
 threaded = "*"
-futures = "*"
+futures = "~=3.1.1"
 
 [dev-packages]
 
