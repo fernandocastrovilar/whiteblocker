@@ -13,7 +13,7 @@ def main():
 	if check == "ko":
 		raise Exception("Nftables is not installed")
 	Thread(target=whiteblocker_process).start()
-	Thread(target=whiteblocker_process).start()
+	Thread(target=whiteblocker_unblock).start()
 #	pool = ThreadPoolExecutor(max_workers=1)
 #	pool.submit(whiteblocker_process)
 #	pool.submit(whiteblocker_unblock)
